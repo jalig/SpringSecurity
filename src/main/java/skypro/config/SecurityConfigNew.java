@@ -28,8 +28,8 @@ public class SecurityConfigNew extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests()
                 .antMatchers("/").hasAnyRole("EMPLOYEE", "IT", "SECURITY", "DIRECTOR")
-                .antMatchers("it_info").hasAnyRole("IT")
-                .antMatchers("security_info").hasAnyRole("SECURITY")
+                .antMatchers("it_info").hasAnyRole("IT", "SECURITY", "DIRECTOR")
+                .antMatchers("security_info").hasAnyRole("SECURITY", "DIRECTOR")
                 .antMatchers("director_info").hasAnyRole("DIRECTOR")
                 .and().formLogin().permitAll();
     }
