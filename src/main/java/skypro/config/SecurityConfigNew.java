@@ -1,21 +1,36 @@
 package skypro.config;
 
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
+
+import javax.sql.DataSource;
 
 @EnableWebSecurity
 public class SecurityConfigNew extends WebSecurityConfigurerAdapter {
 
+    private final DataSource dataSource;
+
+    public SecurityConfigNew(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        User.UserBuilder userBuilder = User.withDefaultPasswordEncoder();
-        auth.inMemoryAuthentication()
-                .withUser(userBuilder.username("Ivan").password("qwerty").roles("USER"))
-                .withUser(userBuilder.username("Petr").password("asdfgh").roles("TESTER"))
-                .withUser(userBuilder.username("Olga").password("zxcvbn").roles("TESTER", "ADMIN"));
+        auth.jdbcAuthentication().dataSource(dataSource);
 
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http.authorizeRequests()
+                .antMatchers("/").hasAnyRole("EMPLOYEE", "IT", "SECURITY", "DIRECTOR")
+                .antMatchers("it_info").hasAnyRole("IT")
+                .antMatchers("security_info").hasAnyRole("SECURITY")
+                .antMatchers("director_info").hasAnyRole("DIRECTOR")
+                .and().formLogin().permitAll();
     }
 }
